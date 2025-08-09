@@ -11,6 +11,8 @@ move_dir = 0;
 
 acc = 0.3;
 dcc = 0.35;
+
+inclination = 10;
 #endregion
 
 #region jump and grav
@@ -29,6 +31,11 @@ xscale = 1;
 yscale = 1; 
 
 see = 1;
+
+angle = 0;
+
+inclination = 10;
 #endregion
 
 state = player_state_free;
+

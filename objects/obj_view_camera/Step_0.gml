@@ -5,6 +5,10 @@ if(instance_exists(target))
         view_width = lerp(camera_get_view_width(cam), zoom_width, 0.1);
         view_height = lerp(camera_get_view_height(cam), zoom_height, 0.1);
     }
+	else if(target.state == player_state_hidden)
+	{
+		shake_lenght = 0;
+	}
 	else 
 	{
         view_width = lerp(camera_get_view_width(cam), normal_width, 0.1);
@@ -24,7 +28,6 @@ if(instance_exists(target))
         x_to+=random_range(-shake_lenght,shake_lenght);
         y_to+=random_range(-shake_lenght,shake_lenght);
     }
-    
     
     var _cx = camera_get_view_x(view_camera[0]);
     var _cy = camera_get_view_y(view_camera[0]);

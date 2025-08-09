@@ -11,6 +11,7 @@ function player_state_free()
 	
 	if(move)
 	{
+		// particulas do movimento
 		if(abs(hsp) > move_spd_max - 0.5 && ground)
 		{
 			var _choose = irandom(100);
@@ -31,18 +32,22 @@ function player_state_free()
 		
 		move_dir = point_direction(0,0,key_right-key_left,0);
 		move_spd = approach(move_spd,move_spd_max,acc);
+		
+		angle = lerp(angle, see * -inclination, 0.20);
 	}
 	else
 	{
 		sprite_index = spr_player;
 		
 		move_spd = approach(move_spd,0,dcc);	
+		
+		angle = approach(angle, 0, 0.25);
 	}
 	
 	hsp = lengthdir_x(move_spd,move_dir);
 	
 	
-	
+	// particulas da animação
 	if(sprite_index == spr_player && image_index >= 4)
 	{
 		for(var i = 0; i < irandom_range(1,1); i++)
@@ -57,6 +62,7 @@ function player_state_free()
 	
 	#region grav and jump
 	
+	// efeito squash and strech
 	if(!ground)
 	{
 		if(place_meeting(x, y + 1, colls))
@@ -112,6 +118,7 @@ function player_state_free()
 		audio_play_sound(snd_jump,1,false);
 	}
 	
+	// sistema de animações do jump e fall
 	if(vsp > 0)
 	{
 		sprite_index = spr_player_air;
@@ -125,11 +132,14 @@ function player_state_free()
 	
 	#endregion
 	
-	if(keyboard_check_pressed(vk_space))
+	#region dead
+	if(place_meeting(x, y, obj_fork_small)) 
 	{
 		state = player_state_dead;
+		
 		image_index = 0;
-	}	
+	}
+	#endregion
 }
 
 function player_state_dead()
@@ -142,8 +152,16 @@ function player_state_dead()
 	
 	image_speed = 1;
 	
+	// mudando a cor para red
+	var r = lerp(color_get_red(image_blend), 160, 0.01);
+	var g = lerp(color_get_green(image_blend), 0, 0.01);
+	var b = lerp(color_get_blue(image_blend), 0, 0.01);
+	
+	image_blend = make_color_rgb(r, g, b);
+	
 	screen_shake(10,60);
 	
+	// criando particulas e mudando para o state hidden
 	if(image_index > image_number - 1 && sprite_index == _sprite_index)
 	{
 		var _choose = irandom(100);
@@ -167,10 +185,15 @@ function player_state_dead()
 function player_state_hidden()
 {
 	image_alpha = 0;
+	image_blend = c_white;
 	
 	x = xstart;
 	y = ystart - 60;
 	
+	hsp = 0;
+	vsp = 0;
+	
+	// particulas e voltar para o stae free
 	var _func = function()
 	{
 		
@@ -184,11 +207,12 @@ function player_state_hidden()
 				
 			var yy = y - sprite_height / 2;
 				
-			instance_create_depth(x, yy, depth - 1, obj_part_splash_die);
+			instance_create_depth(x, yy, depth - 1, obj_part_splash_revive);
 		}
 	}
 	
-	var _time_source = time_source_create(time_source_game, 80, time_source_units_frames, _func);
+	// time source da troca de estado e particula
+	var _time_source = time_source_create(time_source_game, 30, time_source_units_frames, _func);
 	
 	time_source_start(_time_source);
 	
